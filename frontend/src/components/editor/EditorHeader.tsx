@@ -10,6 +10,9 @@ interface EditorToolbarProps {
   titleDraft: string;
   isPreviewVisible: boolean;
   canManageAccess: boolean;
+  viewHref?: string;
+  backHref?: string;
+  showBackButton?: boolean;
   onTitleChange: (title: string) => void;
   onTogglePreview: () => void;
   onOpenShare: () => void;
@@ -20,6 +23,9 @@ export function EditorHeader({
   titleDraft,
   isPreviewVisible,
   canManageAccess,
+  viewHref,
+  backHref,
+  showBackButton = true,
   onTitleChange,
   onTogglePreview,
   onOpenShare,
@@ -28,11 +34,21 @@ export function EditorHeader({
     <header className="rounded-lg border p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => history.back()}>
-            <ArrowLeftIcon className="mr-1 size-4" /> Back
-          </Button>
+          {showBackButton ? (
+            backHref ? (
+              <Button asChild variant="outline" size="sm">
+                <Link to={backHref}>
+                  <ArrowLeftIcon className="mr-1 size-4" /> Back
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => history.back()}>
+                <ArrowLeftIcon className="mr-1 size-4" /> Back
+              </Button>
+            )
+          ) : null}
           <Button asChild variant="outline" size="sm">
-            <Link to={`/presentations/${presentationId}`}>
+            <Link to={viewHref ?? `/presentations/${presentationId}`}>
               <EyeIcon className="mr-1 size-4" /> View
             </Link>
           </Button>

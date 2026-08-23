@@ -14,13 +14,36 @@ import { PresentationEditorPage } from "./pages/PresentationEditorPage";
 import { SharedPresentationsPage } from "./pages/SharedPresentationsPage";
 import { SharedPresentationReadOnlyPage } from "./pages/SharedPresentationReadOnlyPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { DemoEditorPage } from "./pages/DemoEditorPage";
+import { DemoPresentationPage } from "./pages/DemoPresentationPage";
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/demo"
+          element={
+            <ThemeProvider storage="session" storageKeyPrefix="demo.">
+              <DemoEditorPage />
+            </ThemeProvider>
+          }
+        />
+        <Route
+          path="/demo/present"
+          element={
+            <ThemeProvider storage="session" storageKeyPrefix="demo.">
+              <DemoPresentationPage />
+            </ThemeProvider>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <ThemeProvider>
+              <AuthProvider>
+                <Routes>
             <Route
               path="/share"
               element={<SharedPresentationReadOnlyPage />}
@@ -47,10 +70,13 @@ export default function App() {
 
             <Route path="/404" element={<NotFoundPage />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
-          </Routes>
-          <Toaster richColors/>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+                </Routes>
+              </AuthProvider>
+            </ThemeProvider>
+          }
+        />
+      </Routes>
+      <Toaster richColors/>
+    </BrowserRouter>
   );
 }

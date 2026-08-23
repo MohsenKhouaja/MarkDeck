@@ -1,5 +1,6 @@
 import { AuthForm } from "@/components/authForm";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export function LandingPage() {
   return (
@@ -55,6 +56,9 @@ export function LandingPage() {
                 }
               >
                 Sign In
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/demo">I am a recruiter</Link>
               </Button>
             </div>
           </div>
