@@ -8,11 +8,16 @@ interface Slide {
   slideOrder: number;
 }
 
+type SlideLock = {
+  username: string;
+};
+
 interface SlideListProps {
   slides: Slide[];
   selectedSlideIndex: number;
   draggingSlideId: string | null;
   dragOverSlideId: string | null;
+  locksBySlideId: Record<string, SlideLock>;
   isGenerating: boolean;
   onSelectSlide: (index: number) => void;
   onDragStart: (slideId: string) => (event: React.DragEvent<HTMLButtonElement>) => void;
@@ -27,6 +32,7 @@ export function SlideList({
   selectedSlideIndex,
   draggingSlideId,
   dragOverSlideId,
+  locksBySlideId,
   isGenerating,
   onSelectSlide,
   onDragStart,
@@ -75,6 +81,11 @@ export function SlideList({
                 role="tab"
               >
                 <span>Slide {index + 1}</span>
+                {locksBySlideId[slide.id] ? (
+                  <span className="ml-2 truncate text-xs text-muted-foreground">
+                    {locksBySlideId[slide.id].username}
+                  </span>
+                ) : null}
               </button>
               <button
                 type="button"

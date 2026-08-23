@@ -20,6 +20,7 @@ interface CreateSlideInput {
 interface UpdateSlideContentInput {
   slideId: string;
   content: string;
+  lockToken: string;
 }
 
 interface ReorderSlidesInput {
@@ -88,7 +89,7 @@ export function useUpdateSlideContentMutation(presentationId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ slideId, content }: UpdateSlideContentInput) => {
+    mutationFn: async ({ slideId, content, lockToken }: UpdateSlideContentInput) => {
       if (!presentationId) {
         throw new Error("E056: Missing presentation id");
       }
@@ -97,6 +98,11 @@ export function useUpdateSlideContentMutation(presentationId: string | null) {
         `/api/presentations/${presentationId}/slides/${slideId}`,
         {
           content,
+        },
+        {
+          headers: {
+            "X-Slide-Lock-Token": lockToken,
+          },
         },
       );
     },
@@ -122,13 +128,18 @@ export function useDeleteSlideMutation(presentationId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (slideId: string) => {
+    mutationFn: async (input: { slideId: string; lockToken: string }) => {
       if (!presentationId) {
         throw new Error("E057: Missing presentation id");
       }
 
       return api.del<{ id: string; deleted: true }>(
-        `/api/presentations/${presentationId}/slides/${slideId}`,
+        `/api/presentations/${presentationId}/slides/${input.slideId}`,
+        {
+          headers: {
+            "X-Slide-Lock-Token": input.lockToken,
+          },
+        },
       );
     },
     onSuccess: async () => {

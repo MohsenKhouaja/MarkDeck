@@ -2,9 +2,22 @@ import { Router } from "express";
 import type { UUID } from "node:crypto";
 import { db } from "../../database/index.js";
 import { badRequest } from "../../errors/http-error.js";
+import {
+  assertSlideHttpLock,
+  beginExclusivePresentationOperation,
+  emitSlideCreated,
+  emitSlideDeleted,
+  emitSlideSaved,
+  emitSlidesGenerated,
+  emitSlidesReordered,
+  releaseSlideLock,
+} from "../../realtime/presentation-realtime.js";
 import { slidesService } from "./slides-service.js";
 
 export const slidesRouter = Router();
+
+const readLockToken = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim() ? value : undefined;
 
 slidesRouter.get("/presentations/:presentationId/slides", async (req, res) => {
   const userId = req.authenticatedUserId as UUID;
@@ -46,6 +59,7 @@ slidesRouter.post("/presentations/:presentationId/slides", async (req, res) => {
     slideOrder,
   });
 
+  emitSlideCreated(presentationId);
   res.status(201).json(createdSlide);
 });
 // frontendAgent the generate button should be in the context creation page and should be disabled if the context is not saved to the backend yet , when i click them route me to the presentation page and show loading
@@ -77,15 +91,21 @@ slidesRouter.post(
       );
     }
 
-    const generatedSlides = await slidesService.generateFromContext(
-      db,
-      userId,
-      presentationId,
-      contextId,
-      numSlides,
-    );
-
-    res.status(201).json(generatedSlides);
+    const finishExclusiveOperation =
+      beginExclusivePresentationOperation(presentationId);
+    try {
+      const generatedSlides = await slidesService.generateFromContext(
+        db,
+        userId,
+        presentationId,
+        contextId,
+        numSlides,
+      );
+      emitSlidesGenerated(presentationId);
+      res.status(201).json(generatedSlides);
+    } finally {
+      finishExclusiveOperation();
+    }
   },
 );
 // frontendAgent when i click ctrl+s or the save button in the presentation page this endpoint is called to update the content of the slide and show the updated content in the UI
@@ -102,6 +122,13 @@ slidesRouter.put(
       throw badRequest("Content is required", "SLIDE_CONTENT_REQUIRED");
     }
 
+    assertSlideHttpLock({
+      userId,
+      presentationId,
+      slideId,
+      lockToken: readLockToken(req.header("x-slide-lock-token")),
+    });
+
     const updatedSlide = await slidesService.update(
       db,
       userId,
@@ -110,6 +137,7 @@ slidesRouter.put(
       content,
     );
 
+    emitSlideSaved(presentationId, { slideId, content });
     res.json(updatedSlide);
   },
 );
@@ -121,12 +149,21 @@ slidesRouter.delete(
     const presentationId = req.params.presentationId as UUID;
     const slideId = req.params.slideId as UUID;
 
+    assertSlideHttpLock({
+      userId,
+      presentationId,
+      slideId,
+      lockToken: readLockToken(req.header("x-slide-lock-token")),
+    });
+
     const result = await slidesService.removeOne(
       db,
       userId,
       presentationId,
       slideId,
     );
+    releaseSlideLock(presentationId, slideId);
+    emitSlideDeleted(presentationId, slideId);
     res.json(result);
   },
 );
@@ -148,6 +185,7 @@ slidesRouter.put(
       second,
     );
 
+    emitSlidesReordered(presentationId);
     res.json({ updated });
   },
 );

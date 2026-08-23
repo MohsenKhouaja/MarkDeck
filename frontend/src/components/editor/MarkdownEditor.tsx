@@ -12,12 +12,14 @@ import {
 interface MarkdownEditorProps {
   markdownDraft: string;
   hasSlides: boolean;
+  isEditable: boolean;
   onMarkdownChange: (value: string) => void;
 }
 
 export function MarkdownEditor({
   markdownDraft,
   hasSlides,
+  isEditable,
   onMarkdownChange,
 }: MarkdownEditorProps) {
   return (
@@ -39,6 +41,7 @@ export function MarkdownEditor({
           className="min-h-0 flex-1 resize-none border-0 bg-transparent p-4 font-mono text-sm focus-visible:ring-0"
           aria-label="Slide markdown content"
           spellCheck={false}
+          disabled={!isEditable}
         />
       )}
     </div>

@@ -66,6 +66,7 @@ export function PresentationEditorPage() {
             selectedSlideIndex={state.slideList.selectedSlideIndex}
             draggingSlideId={state.slideList.draggingSlideId}
             dragOverSlideId={state.slideList.dragOverSlideId}
+            locksBySlideId={state.slideList.locksBySlideId}
             isGenerating={state.slideList.isGenerating}
             onSelectSlide={state.slideList.onSelectSlide}
             onDragStart={state.slideList.onDragStart}
@@ -103,14 +104,22 @@ export function PresentationEditorPage() {
             isDeleting={state.toolbar.isDeleting}
             isSaving={state.toolbar.isSaving}
             isSavedVisible={state.toolbar.isSavedVisible}
+            realtimeStatus={state.toolbar.realtimeStatus}
+            currentSlideLock={state.toolbar.currentSlideLock}
+            isEditingCurrentSlide={state.toolbar.isEditingCurrentSlide}
+            canTakeOver={state.toolbar.canTakeOver}
             onAddSlide={state.toolbar.onAddSlide}
             onDeleteSlide={state.toolbar.onDeleteSlide}
             onSave={state.toolbar.onSave}
+            onStartEditing={state.toolbar.onStartEditing}
+            onStopEditing={state.toolbar.onStopEditing}
+            onTakeOverEditing={state.toolbar.onTakeOverEditing}
           />
 
           <MarkdownEditor
             markdownDraft={state.editor.markdownDraft}
             hasSlides={state.editor.hasSlides}
+            isEditable={state.editor.isEditable}
             onMarkdownChange={state.editor.onMarkdownChange}
           />
 

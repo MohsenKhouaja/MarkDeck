@@ -2,6 +2,7 @@ import { Router } from "express";
 import type { UUID } from "node:crypto";
 import { db } from "../../database/index.js";
 import { badRequest } from "../../errors/http-error.js";
+import { releasePresentationUserLock } from "../../realtime/presentation-realtime.js";
 import { accessService, type GrantPermission } from "./presentations_access-service.js";
 
 export const presentationsAccessRouter = Router();
@@ -62,6 +63,9 @@ presentationsAccessRouter.post(
         expiresAt: parseOptionalFutureDate(req.body?.expiresAt),
       },
     );
+    if (grant.permission !== "editor") {
+      releasePresentationUserLock(req.params.id as UUID, grant.user.id as UUID);
+    }
     res.status(201).json(grant);
   },
 );
@@ -69,12 +73,24 @@ presentationsAccessRouter.post(
 presentationsAccessRouter.delete(
   "/presentations/:id/access/:grantId",
   async (req, res) => {
+    const grants = await accessService.listGrants(
+      db,
+      req.authenticatedUserId as UUID,
+      req.params.id as UUID,
+    );
+    const grant = grants.find((candidate) => candidate.id === req.params.grantId);
     await accessService.removeGrant(
       db,
       req.authenticatedUserId as UUID,
       req.params.id as UUID,
       req.params.grantId as UUID,
     );
+    if (grant?.user) {
+      releasePresentationUserLock(
+        req.params.id as UUID,
+        grant.user.id as UUID,
+      );
+    }
     res.status(204).end();
   },
 );

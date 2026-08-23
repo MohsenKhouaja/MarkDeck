@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 import {
   usePresentationDetailQuery,
   useUpdatePresentationMutation,
 } from "@/hooks/queries/usePresentations";
 import {
+  type SlideRecord,
   usePresentationSlidesQuery,
   useCreateSlideMutation,
   useDeleteSlideMutation,
@@ -19,9 +22,12 @@ import {
   useContextFilesQuery,
   useUpdateContextMutation,
 } from "@/hooks/queries/useContextsFiles";
+import { queryKeys } from "@/lib/queryKeys";
+import { useSlideLocks } from "./useSlideLocks";
 
 export function useEditorState() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const detailQuery = usePresentationDetailQuery(id ?? null, Boolean(id));
   const slidesQuery = usePresentationSlidesQuery(id ?? null, Boolean(id));
   const linkedContextQuery = useContextByPresentationQuery(id ?? null);
@@ -79,29 +85,33 @@ export function useEditorState() {
   // Sync slide data into draft/lastSaved state
   useEffect(() => {
     if (!slidesQuery.data) return;
-    setDraftById((current) => {
-      const next = { ...current };
-      slidesQuery.data.forEach((slide) => {
-        if (next[slide.id] === undefined) next[slide.id] = slide.content ?? "";
+    queueMicrotask(() => {
+      setDraftById((current) => {
+        const next = { ...current };
+        slidesQuery.data.forEach((slide) => {
+          if (next[slide.id] === undefined) next[slide.id] = slide.content ?? "";
+        });
+        return next;
       });
-      return next;
-    });
-    setLastSavedById((current) => {
-      const next = { ...current };
-      slidesQuery.data.forEach((slide) => {
-        if (next[slide.id] === undefined) next[slide.id] = slide.content ?? "";
+      setLastSavedById((current) => {
+        const next = { ...current };
+        slidesQuery.data.forEach((slide) => {
+          if (next[slide.id] === undefined) next[slide.id] = slide.content ?? "";
+        });
+        return next;
       });
-      return next;
     });
   }, [slidesQuery.data]);
 
   // Clamp selected slide index
   useEffect(() => {
-    if (slides.length === 0) {
-      setSelectedSlideIndex(0);
-      return;
-    }
-    setSelectedSlideIndex((current) => Math.min(current, Math.max(slides.length - 1, 0)));
+    queueMicrotask(() => {
+      if (slides.length === 0) {
+        setSelectedSlideIndex(0);
+        return;
+      }
+      setSelectedSlideIndex((current) => Math.min(current, Math.max(slides.length - 1, 0)));
+    });
   }, [slides.length]);
 
   // Cleanup timers on unmount
@@ -132,28 +142,95 @@ export function useEditorState() {
     savedTimerRef.current = window.setTimeout(() => setIsSavedVisible(false), 1500);
   }, []);
 
+  const handleRealtimeSlideSaved = useCallback(
+    ({ slideId, content }: { slideId: string; content: string }) => {
+      if (!id) return;
+      queryClient.setQueryData<SlideRecord[]>(
+        queryKeys.slides.byPresentation(id),
+        (current) =>
+          (current ?? []).map((slide) =>
+            slide.id === slideId ? { ...slide, content } : slide,
+          ),
+      );
+      setLastSavedById((current) => ({ ...current, [slideId]: content }));
+      setDraftById((current) => ({ ...current, [slideId]: content }));
+    },
+    [id, queryClient],
+  );
+
+  const handleRealtimeSlidesChanged = useCallback(() => {
+    if (!id) return;
+    void queryClient.invalidateQueries({
+      queryKey: queryKeys.slides.byPresentation(id),
+    });
+  }, [id, queryClient]);
+
+  const slideLocks = useSlideLocks({
+    presentationId: id ?? null,
+    enabled: Boolean(id && detailQuery.data?.capabilities.editContent),
+    onSlideSaved: handleRealtimeSlideSaved,
+    onSlidesChanged: handleRealtimeSlidesChanged,
+  });
+
+  const currentSlideLock = currentSlide
+    ? slideLocks.locksBySlideId[currentSlide.id] ?? null
+    : null;
+  const isEditingCurrentSlide =
+    Boolean(currentSlide) && slideLocks.ownedLock?.slideId === currentSlide?.id;
+
   const saveSlideContent = useCallback(async (slideId: string, content: string, { showNotice }: { showNotice: boolean }) => {
-    if (lastSavedById[slideId] === content) return;
-    if (savingSlidesRef.current.has(slideId)) return;
+    const ownedLock = slideLocks.ownedLock;
+    if (ownedLock?.slideId !== slideId) {
+      toast.error("Start editing this slide before saving");
+      return false;
+    }
+    if (lastSavedById[slideId] === content) return true;
+    if (savingSlidesRef.current.has(slideId)) return false;
     savingSlidesRef.current.add(slideId);
     try {
-      await updateSlideMutation.mutateAsync({ slideId, content });
+      await updateSlideMutation.mutateAsync({
+        slideId,
+        content,
+        lockToken: ownedLock.lockToken,
+      });
       setLastSavedById((current) => ({ ...current, [slideId]: content }));
       if (showNotice) showSavedNotice();
+      return true;
     } catch {
       // error handled by mutation onError toast
+      return false;
     } finally {
       savingSlidesRef.current.delete(slideId);
     }
-  }, [lastSavedById, showSavedNotice, updateSlideMutation]);
+  }, [lastSavedById, showSavedNotice, slideLocks.ownedLock, updateSlideMutation]);
 
   const scheduleAutosave = (slideId: string, content: string) => {
+    if (slideLocks.ownedLock?.slideId !== slideId) return;
     const existingTimer = autosaveTimersRef.current[slideId];
     if (existingTimer) window.clearTimeout(existingTimer);
     autosaveTimersRef.current[slideId] = window.setTimeout(() => {
       void saveSlideContent(slideId, content, { showNotice: true });
     }, 1200);
   };
+
+  const saveAndReleaseCurrentLock = useCallback(async () => {
+    if (!currentSlide || slideLocks.ownedLock?.slideId !== currentSlide.id) {
+      return true;
+    }
+
+    const pendingTimer = autosaveTimersRef.current[currentSlide.id];
+    if (pendingTimer) {
+      window.clearTimeout(pendingTimer);
+      delete autosaveTimersRef.current[currentSlide.id];
+    }
+
+    const saved = await saveSlideContent(currentSlide.id, markdownDraft, {
+      showNotice: true,
+    });
+    if (!saved) return false;
+    await slideLocks.releaseLock();
+    return true;
+  }, [currentSlide, markdownDraft, saveSlideContent, slideLocks]);
 
   const onAddSlide = async () => {
     try {
@@ -177,9 +254,16 @@ export function useEditorState() {
 
   const onDeleteSlide = async () => {
     if (!currentSlide) return;
+    if (slideLocks.ownedLock?.slideId !== currentSlide.id) {
+      toast.error("Start editing this slide before deleting it");
+      return;
+    }
     const deletingIndex = safeSelectedSlideIndex;
     try {
-      await deleteSlideMutation.mutateAsync(currentSlide.id);
+      await deleteSlideMutation.mutateAsync({
+        slideId: currentSlide.id,
+        lockToken: slideLocks.ownedLock.lockToken,
+      });
       setDraftById((current) => {
         const next = { ...current };
         delete next[currentSlide.id];
@@ -190,6 +274,7 @@ export function useEditorState() {
         delete next[currentSlide.id];
         return next;
       });
+      await slideLocks.releaseLock();
       setSelectedSlideIndex(Math.max(deletingIndex - 1, 0));
     } catch {
       // error handled by mutation onError toast
@@ -205,6 +290,13 @@ export function useEditorState() {
   const handleDragEnd = () => {
     setDraggingSlideId(null);
     setDragOverSlideId(null);
+  };
+
+  const onSelectSlide = async (index: number) => {
+    if (index === safeSelectedSlideIndex) return;
+    const released = await saveAndReleaseCurrentLock();
+    if (!released) return;
+    setSelectedSlideIndex(index);
   };
 
   const onDropSlide = async (targetId: string) => {
@@ -244,8 +336,12 @@ export function useEditorState() {
   const onSaveSelectedSlide = useCallback(async () => {
     if (!currentSlide) return;
     const pendingTimer = autosaveTimersRef.current[currentSlide.id];
-    if (pendingTimer) window.clearTimeout(pendingTimer);
-    await saveSlideContent(currentSlide.id, markdownDraft, { showNotice: true });
+    if (pendingTimer) {
+      window.clearTimeout(pendingTimer);
+      delete autosaveTimersRef.current[currentSlide.id];
+    }
+    const saved = await saveSlideContent(currentSlide.id, markdownDraft, { showNotice: true });
+    if (!saved) return;
     if (!id) return;
     const normalizedTitle = titleDraft.trim();
     if (normalizedTitle && normalizedTitle !== (detailQuery.data?.title ?? "")) {
@@ -290,6 +386,10 @@ export function useEditorState() {
 
   const onGenerateSlides = async () => {
     if (!activeContextId) return;
+    if (Object.keys(slideLocks.locksBySlideId).length > 0) {
+      toast.error("Stop editing before generating slides");
+      return;
+    }
     const parsed = numSlides.trim() !== "" ? Number(numSlides) : undefined;
     try {
       await generateSlidesMutation.mutateAsync({
@@ -306,6 +406,7 @@ export function useEditorState() {
 
   const onMarkdownChange = (next: string) => {
     if (!currentSlide) return;
+    if (!isEditingCurrentSlide) return;
     setDraftById((current) => ({
       ...current,
       [currentSlide.id]: next,
@@ -319,6 +420,29 @@ export function useEditorState() {
 
   const onOpenShare = () => {
     setIsShareDialogOpen(true);
+  };
+
+  const onStartEditing = async () => {
+    if (!currentSlide) return;
+    const response = await slideLocks.acquireLock(currentSlide.id);
+    if (!response.ok) {
+      toast.error(response.message);
+    }
+  };
+
+  const onTakeOverEditing = async () => {
+    if (!currentSlide) return;
+    const response = await slideLocks.acquireLock(currentSlide.id, true);
+    if (!response.ok) {
+      toast.error(response.message);
+    }
+  };
+
+  const onStopEditing = async () => {
+    const released = await saveAndReleaseCurrentLock();
+    if (!released) {
+      toast.error("Could not save the slide before stopping editing");
+    }
   };
 
   const onRemovePendingFile = (file: File) => {
@@ -354,8 +478,9 @@ export function useEditorState() {
       selectedSlideIndex: safeSelectedSlideIndex,
       draggingSlideId,
       dragOverSlideId,
+      locksBySlideId: slideLocks.locksBySlideId,
       isGenerating: generateSlidesMutation.isPending,
-      onSelectSlide: setSelectedSlideIndex,
+      onSelectSlide: (index: number) => void onSelectSlide(index),
       onDragStart: handleDragStart,
       onDragEnd: handleDragEnd,
       onDropSlide,
@@ -383,13 +508,22 @@ export function useEditorState() {
       isDeleting: deleteSlideMutation.isPending,
       isSaving: updateSlideMutation.isPending,
       isSavedVisible,
+      realtimeStatus: slideLocks.status,
+      currentSlideLock,
+      isEditingCurrentSlide,
+      canTakeOver:
+        slideLocks.lastAcquireError?.code === "PRESENTATION_LOCK_ALREADY_HELD",
       onAddSlide,
       onDeleteSlide,
       onSave: onSaveSelectedSlide,
+      onStartEditing,
+      onStopEditing,
+      onTakeOverEditing,
     },
     editor: {
       markdownDraft,
       hasSlides: slides.length > 0,
+      isEditable: isEditingCurrentSlide && slideLocks.status === "connected",
       onMarkdownChange,
     },
     shareDialog: {
