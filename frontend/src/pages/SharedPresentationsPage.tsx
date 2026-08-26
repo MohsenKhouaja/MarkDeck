@@ -25,10 +25,13 @@ export function SharedPresentationsPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-lg border p-4">
-        <h2 className="text-lg font-semibold">Shared presentations</h2>
-        <p className="text-sm text-muted-foreground">
+    <div className="space-y-8">
+      <section className="rounded-2xl bg-[oklch(0.93_0.025_155)] p-6 md:p-8">
+        <span className="mb-5 grid size-11 place-items-center rounded-xl bg-[var(--color-sage)] text-white shadow-sm">
+          <Share2Icon className="size-5" aria-hidden="true" />
+        </span>
+        <h2 className="text-3xl font-semibold tracking-tight">Shared presentations</h2>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-[oklch(0.37_0.045_155)]">
           Presentations shared directly with your account.
         </p>
       </section>
@@ -55,7 +58,7 @@ export function SharedPresentationsPage() {
 
       {presentationsQuery.isSuccess && sharedPresentations.length > 0 ? (
         <section
-          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs"
           aria-label="Shared presentations list"
         >
           {sharedPresentations.map((presentation) => (

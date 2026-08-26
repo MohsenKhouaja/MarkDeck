@@ -46,7 +46,7 @@ export function PresentationEditorPage() {
 
   return (
     <main
-      className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 md:p-6"
+      className="flex min-h-screen w-full flex-col gap-3 bg-background p-3 md:p-5"
       aria-label="Presentation editor"
     >
       <EditorHeader
@@ -59,8 +59,8 @@ export function PresentationEditorPage() {
         onOpenShare={state.shareDialog.onOpen}
       />
 
-      <div className="grid flex-1 gap-4 overflow-hidden xl:grid-cols-[320px_1fr]">
-        <aside className="flex flex-col gap-4 overflow-y-auto">
+      <div className="grid flex-1 gap-3 overflow-hidden xl:grid-cols-[300px_1fr]">
+        <aside className="flex flex-col gap-3 overflow-y-auto">
           <SlideList
             slides={state.slideList.slides}
             selectedSlideIndex={state.slideList.selectedSlideIndex}
@@ -98,7 +98,7 @@ export function PresentationEditorPage() {
           </div>
         </aside>
 
-        <section className="flex min-h-0 flex-col gap-4">
+        <section className="flex min-h-0 flex-col gap-3">
           <EditorToolbar
             hasCurrentSlide={state.toolbar.hasCurrentSlide}
             isDeleting={state.toolbar.isDeleting}

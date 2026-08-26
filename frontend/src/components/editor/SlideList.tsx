@@ -42,9 +42,10 @@ export function SlideList({
   onDragLeave,
 }: SlideListProps) {
   return (
-    <section className="rounded-lg border border-border bg-background">
-      <div className="border-b border-border px-3 py-2">
-        <p className="text-xs font-medium text-muted-foreground">Slides</p>
+    <section className="rounded-xl border border-primary/10 bg-card shadow-xs">
+      <div className="flex items-center justify-between border-b border-primary/10 px-3 py-2.5">
+        <p className="text-sm font-semibold">Slides</p>
+        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{slides.length}</span>
       </div>
       <div className="max-h-[50vh] space-y-1 overflow-y-auto p-2" role="tablist" aria-label="Slides">
         {isGenerating ? (
@@ -59,12 +60,12 @@ export function SlideList({
           slides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`flex h-10 items-center gap-2 rounded px-2 text-sm text-foreground transition ${
+              className={`flex h-11 items-center gap-2 rounded-lg px-2 text-sm text-foreground transition-colors ${
                 draggingSlideId === slide.id
-                  ? "bg-muted shadow-sm"
+                  ? "bg-secondary shadow-sm"
                   : index === selectedSlideIndex
-                    ? "bg-muted"
-                    : "hover:bg-muted/60"
+                    ? "bg-secondary text-secondary-foreground shadow-2xs"
+                    : "hover:bg-muted/70"
               }`}
               onDragOver={(event) => {
                 event.preventDefault();
@@ -80,6 +81,7 @@ export function SlideList({
                 aria-selected={index === selectedSlideIndex}
                 role="tab"
               >
+                <span className="mr-1 grid size-6 place-items-center rounded-md bg-card text-xs font-semibold shadow-2xs">{index + 1}</span>
                 <span>Slide {index + 1}</span>
                 {locksBySlideId[slide.id] ? (
                   <span className="ml-2 truncate text-xs text-muted-foreground">
@@ -89,7 +91,7 @@ export function SlideList({
               </button>
               <button
                 type="button"
-                className="flex h-full min-h-9 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-muted-foreground"
+                className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
                 draggable
                 onDragStart={onDragStart(slide.id)}
                 onDragEnd={onDragEnd}

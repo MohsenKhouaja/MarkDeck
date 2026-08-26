@@ -2,7 +2,9 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FileTextIcon,
+  Layers3Icon,
   PlusCircleIcon,
+  SparklesIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,51 +58,58 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-lg border p-4">
-        <h2 className="text-lg font-semibold">Dashboard</h2>
-        <p className="text-sm text-muted-foreground">
-          Create and manage your presentations.
-        </p>
+    <div className="space-y-10">
+      <section className="grid gap-6 overflow-hidden rounded-2xl bg-[oklch(0.925_0.03_250)] p-6 md:grid-cols-[1fr_minmax(320px,0.8fr)] md:p-8">
+        <div className="flex max-w-xl flex-col justify-center">
+          <span className="mb-5 grid size-11 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <Layers3Icon className="size-5" aria-hidden="true" />
+          </span>
+          <h2 className="text-3xl font-semibold tracking-tight">Turn the next idea into a deck.</h2>
+          <p className="mt-3 text-sm leading-6 text-[oklch(0.38_0.045_250)]">
+            Start with a title, then build in markdown with your notes, sources, and live slide preview side by side.
+          </p>
+        </div>
+
+        <form
+          onSubmit={onCreate}
+          className="flex flex-col justify-center rounded-xl border border-primary/15 bg-card p-5 shadow-sm"
+          aria-label="Create presentation form"
+        >
+          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-primary">
+            <SparklesIcon className="size-4" aria-hidden="true" />
+            New presentation
+          </div>
+          <label htmlFor="presentation-title" className="mb-2 text-sm font-medium">What are you presenting?</label>
+          <Input
+            id="presentation-title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="e.g. Distributed systems review"
+          />
+          <Button type="submit" className="mt-3 w-full" disabled={createMutation.isPending || !title.trim()}>
+            {createMutation.isPending ? <Spinner /> : <PlusCircleIcon className="size-4" />}
+            Create presentation
+          </Button>
+        </form>
       </section>
 
-      <form
-        onSubmit={onCreate}
-        className="flex flex-col gap-2 rounded-lg border p-4 md:flex-row"
-        aria-label="Create presentation form"
-      >
-        <Input
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="Presentation title"
-          aria-label="Presentation title"
-        />
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || !title.trim()}
-        >
-          {createMutation.isPending ? (
-            <Spinner className="mr-2" />
-          ) : (
-            <PlusCircleIcon className="mr-2 size-4" />
-          )}
-          Create Presentation
-        </Button>
-      </form>
-
       {presentationsQuery.isPending ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 rounded-xl bg-card p-5 text-sm text-muted-foreground">
           <Spinner /> Loading presentations...
         </div>
       ) : null}
 
       {presentationsQuery.isSuccess ? (
-        <div className="space-y-10">
+        <div className="space-y-8">
           <section className="space-y-4" aria-label="Owned presentations">
-            <header>
-              <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+            <header className="flex items-end justify-between gap-4">
+              <div>
+              <h3 className="text-xl font-semibold tracking-tight text-foreground">
                 Your presentations
               </h3>
+              <p className="mt-1 text-sm text-muted-foreground">Decks you own and control.</p>
+              </div>
+              <span className="text-sm font-medium text-primary">{ownedPresentations.length} total</span>
             </header>
             {ownedPresentations.length === 0 ? (
               <Empty className="border">
@@ -115,7 +124,7 @@ export function DashboardPage() {
                 </EmptyHeader>
               </Empty>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
                 {ownedPresentations.map((presentation) => (
                   <PresentationCard
                     key={presentation.id}
@@ -141,9 +150,10 @@ export function DashboardPage() {
 
           <section className="space-y-4" aria-label="Editable presentations">
             <header>
-              <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h3 className="text-xl font-semibold tracking-tight text-foreground">
                 Shared with you
               </h3>
+              <p className="mt-1 text-sm text-muted-foreground">Presentations where you can contribute.</p>
             </header>
             {editablePresentations.length === 0 ? (
               <Empty className="border">
@@ -158,7 +168,7 @@ export function DashboardPage() {
                 </EmptyHeader>
               </Empty>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
                 {editablePresentations.map((presentation) => (
                   <PresentationCard
                     key={presentation.id}
@@ -182,11 +192,11 @@ export function DashboardPage() {
           {viewOnlyPresentations.length > 0 ? (
             <section className="space-y-4" aria-label="View-only presentations">
               <header>
-                <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
                   Shared view-only
                 </h3>
               </header>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
                 {viewOnlyPresentations.map((presentation) => (
                   <PresentationCard
                     key={presentation.id}

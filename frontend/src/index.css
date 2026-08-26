@@ -30,59 +30,63 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --color-eggshell: #fefcfa;
-  --color-powder: #f7f3ef;
-  --color-chalk: #e8e4e2;
-  --color-fog: #b3b0ad;
-  --color-gravel: #797069;
-  --color-slate: #a69e99;
-  --color-obsidian: #000000;
-  --color-signal-blue: #0447ff;
-  --color-ember: #ff4704;
+  --color-canvas: oklch(0.975 0.008 250);
+  --color-surface: oklch(0.995 0.003 250);
+  --color-soft: oklch(0.945 0.012 250);
+  --color-line: oklch(0.875 0.018 250);
+  --color-ink: oklch(0.22 0.025 250);
+  --color-subtle-ink: oklch(0.46 0.035 250);
+  --color-mineral: oklch(0.47 0.105 250);
+  --color-mineral-strong: oklch(0.41 0.105 250);
+  --color-mineral-soft: oklch(0.93 0.025 250);
+  --color-sage: oklch(0.63 0.075 155);
+  --color-sage-soft: oklch(0.93 0.025 155);
+  --color-coral: oklch(0.62 0.12 30);
+  --color-coral-soft: oklch(0.94 0.025 30);
 
   --font-waldenburg: "Waldenburg", "Cormorant Garamond", ui-serif, serif;
   --font-waldenburgfh: "WaldenburgFH", ui-sans-serif, system-ui, sans-serif;
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-geist-mono: "Geist Mono", ui-monospace, monospace;
 
-  --background: var(--color-eggshell);
-  --foreground: var(--color-obsidian);
-  --card: #ffffff;
-  --card-foreground: var(--color-obsidian);
-  --popover: #ffffff;
-  --popover-foreground: var(--color-obsidian);
-  --primary: var(--color-obsidian);
-  --primary-foreground: var(--color-eggshell);
-  --secondary: var(--color-powder);
-  --secondary-foreground: var(--color-obsidian);
-  --muted: var(--color-powder);
-  --muted-foreground: var(--color-gravel);
-  --accent: var(--color-powder);
-  --accent-foreground: var(--color-obsidian);
-  --destructive: var(--color-obsidian);
-  --destructive-foreground: var(--color-eggshell);
-  --border: var(--color-chalk);
-  --input: var(--color-chalk);
-  --ring: var(--color-slate);
-  --chart-1: var(--color-obsidian);
-  --chart-2: var(--color-gravel);
-  --chart-3: var(--color-slate);
-  --chart-4: var(--color-fog);
-  --chart-5: var(--color-chalk);
-  --sidebar: var(--color-eggshell);
-  --sidebar-foreground: var(--color-obsidian);
-  --sidebar-primary: var(--color-obsidian);
-  --sidebar-primary-foreground: var(--color-eggshell);
-  --sidebar-accent: var(--color-powder);
-  --sidebar-accent-foreground: var(--color-obsidian);
-  --sidebar-border: var(--color-chalk);
-  --sidebar-ring: var(--color-slate);
+  --background: var(--color-canvas);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-mineral);
+  --primary-foreground: oklch(0.99 0.004 250);
+  --secondary: var(--color-mineral-soft);
+  --secondary-foreground: oklch(0.34 0.085 250);
+  --muted: var(--color-soft);
+  --muted-foreground: var(--color-subtle-ink);
+  --accent: var(--color-mineral-soft);
+  --accent-foreground: oklch(0.32 0.085 250);
+  --destructive: var(--color-coral);
+  --destructive-foreground: oklch(0.99 0.006 30);
+  --border: var(--color-line);
+  --input: var(--color-line);
+  --ring: var(--color-mineral);
+  --chart-1: var(--color-mineral);
+  --chart-2: var(--color-sage);
+  --chart-3: var(--color-coral);
+  --chart-4: oklch(0.68 0.07 285);
+  --chart-5: oklch(0.72 0.075 85);
+  --sidebar: oklch(0.955 0.02 250);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-mineral);
+  --sidebar-primary-foreground: oklch(0.99 0.004 250);
+  --sidebar-accent: var(--color-mineral-soft);
+  --sidebar-accent-foreground: oklch(0.32 0.085 250);
+  --sidebar-border: oklch(0.86 0.025 250);
+  --sidebar-ring: var(--color-mineral);
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-waldenburg);
 
-  --radius: 1rem;
+  --radius: 0.75rem;
   --shadow-2xs: rgba(0, 0, 0, 0.075) 0px 0px 0px 0.5px inset;
   --shadow-xs:
     rgba(0, 0, 0, 0.06) 0px 0px 0px 1px,
@@ -119,6 +123,15 @@
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    min-width: 320px;
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-mineral-soft);
+    color: var(--color-ink);
   }
 }
 
@@ -134,7 +147,7 @@
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.6s cubic-bezier(0.25, 1, 0.5, 1) backwards;
+  animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

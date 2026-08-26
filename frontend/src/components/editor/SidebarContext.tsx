@@ -42,13 +42,16 @@ export function SidebarContext({
   onNumSlidesChange,
 }: SidebarContextProps) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <h3 className="mb-3 text-sm font-medium">Context</h3>
+    <div className="rounded-xl border border-primary/10 bg-card p-4 shadow-xs">
+      <div className="mb-3 flex items-center gap-2">
+        <span className="grid size-7 place-items-center rounded-md bg-secondary text-secondary-foreground"><SparklesIcon className="size-3.5" /></span>
+        <h3 className="text-sm font-semibold">Source context</h3>
+      </div>
       <form onSubmit={onSaveContext} className="space-y-3">
         <Textarea
           value={effectivePromptDraft}
           onChange={(event) => onPromptChange(event.target.value)}
-          placeholder="Add prompt context for AI generation"
+          placeholder="What should this presentation cover?"
           rows={6}
           aria-label="Context prompt"
           className="max-h-64 overflow-y-auto resize-y"
@@ -76,16 +79,16 @@ export function SidebarContext({
             </div>
           ))}
         </div>
-        <Button type="submit" className="w-full" disabled={isUpdating}>
+        <Button type="submit" variant="secondary" className="w-full" disabled={isUpdating}>
           {isUpdating ? <Spinner className="mr-2" /> : <SaveIcon className="mr-2 size-4" />}
           Save Context
         </Button>
       </form>
 
-      <Separator className="my-1" />
+      <Separator className="my-4" />
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">Generate</p>
+        <p className="text-sm font-semibold">Generate slides</p>
         <Input
           type="number" min={1} max={50} placeholder="Number of slides" value={numSlides}
           onChange={(e) => onNumSlidesChange(e.target.value)}

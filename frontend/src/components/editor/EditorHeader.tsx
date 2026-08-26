@@ -31,23 +31,23 @@ export function EditorHeader({
   onOpenShare,
 }: EditorToolbarProps) {
   return (
-    <header className="rounded-lg border p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+    <header className="rounded-xl border border-primary/10 bg-card px-3 py-3 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {showBackButton ? (
             backHref ? (
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="ghost" size="sm">
                 <Link to={backHref}>
                   <ArrowLeftIcon className="mr-1 size-4" /> Back
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" size="sm" onClick={() => history.back()}>
+              <Button variant="ghost" size="sm" onClick={() => history.back()}>
                 <ArrowLeftIcon className="mr-1 size-4" /> Back
               </Button>
             )
           ) : null}
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to={viewHref ?? `/presentations/${presentationId}`}>
               <EyeIcon className="mr-1 size-4" /> View
             </Link>
@@ -55,13 +55,13 @@ export function EditorHeader({
           <Input
             value={titleDraft}
             onChange={(event) => onTitleChange(event.target.value)}
-            className="max-w-sm"
+            className="min-w-32 max-w-md flex-1 border-transparent bg-secondary/55 font-semibold shadow-none hover:border-primary/15 focus-visible:bg-card"
             aria-label="Presentation title"
           />
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant={isPreviewVisible ? "secondary" : "outline"}
             size="sm"
             onClick={onTogglePreview}
           >
@@ -70,7 +70,7 @@ export function EditorHeader({
           </Button>
           {canManageAccess ? (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={onOpenShare}
             >

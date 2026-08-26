@@ -26,11 +26,14 @@ export function LivePreview({ content, visible }: LivePreviewProps) {
   if (!visible) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-background p-4">
-      <p className="text-xs font-medium text-muted-foreground">Preview</p>
+    <div className="flex flex-col gap-3 rounded-xl border border-primary/10 bg-[oklch(0.94_0.016_250)] p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold">Live preview</p>
+        <span className="flex items-center gap-1.5 text-xs font-medium text-[oklch(0.38_0.075_155)]"><span className="size-2 rounded-full bg-[var(--color-sage)]" />Synced</span>
+      </div>
       <div
         ref={wrapperRef}
-        className="relative w-full overflow-hidden rounded border aspect-video"
+        className="relative aspect-video w-full overflow-hidden rounded-lg border border-primary/10 bg-card shadow-xl"
       >
         <div
           className="absolute top-0 left-0 origin-top-left overflow-hidden"

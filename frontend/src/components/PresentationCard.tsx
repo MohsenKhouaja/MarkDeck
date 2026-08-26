@@ -2,16 +2,10 @@
 
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Trash2Icon } from "lucide-react";
+import { ArrowUpRightIcon, CalendarDaysIcon, FileTextIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface PresentationCardProps {
   id: string;
@@ -48,22 +42,29 @@ export function PresentationCard({
 }: PresentationCardProps) {
   const formattedDate = useMemo(() => new Date(createdAt).toLocaleString(), [createdAt]);
   return (
-    <Card
+    <article
       key={id}
-      className={`rounded-xl bg-card shadow-sm ${className ?? ""}`}
+      className={cn(
+        "group flex flex-col gap-4 px-4 py-4 transition-colors duration-200 hover:bg-secondary/45 sm:flex-row sm:items-center",
+        className,
+      )}
     >
-      <CardHeader>
-        <CardTitle className="line-clamp-2 text-2xl leading-tight">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">
-          Created {formattedDate}
-        </p>
-        <Badge variant={badgeVariant} className="mt-2">
-          {badgeLabel}
-        </Badge>
-      </CardContent>
-      <CardFooter className="flex flex-wrap gap-2">
+      <div className="flex min-w-0 flex-1 items-start gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground transition-colors group-hover:bg-[oklch(0.9_0.035_250)]">
+          <FileTextIcon className="size-4" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h4 className="line-clamp-1 font-semibold leading-6">{title}</h4>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <CalendarDaysIcon className="size-3.5" aria-hidden="true" />
+              {formattedDate}
+            </span>
+            <Badge variant={badgeVariant}>{badgeLabel}</Badge>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
         {actions.map((action, index) => {
           if (action.type === "link") {
             return (
@@ -73,7 +74,10 @@ export function PresentationCard({
                 size="sm"
                 variant={action.variant ?? "outline"}
               >
-                <Link to={action.to}>{action.label}</Link>
+                <Link to={action.to}>
+                  {action.label}
+                  {action.label !== "Delete" ? <ArrowUpRightIcon className="size-3.5" /> : null}
+                </Link>
               </Button>
             );
           }
@@ -92,7 +96,7 @@ export function PresentationCard({
             </Button>
           );
         })}
-      </CardFooter>
-    </Card>
+      </div>
+    </article>
   );
 }

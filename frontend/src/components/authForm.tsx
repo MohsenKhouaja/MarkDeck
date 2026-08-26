@@ -58,30 +58,30 @@ export function AuthForm() {
     }
   };
   return (
-    <div className="flex w-full items-center justify-center p-4">
+    <div className="mt-8 flex w-full items-center justify-center">
       <Tabs
         value={mode}
         onValueChange={changeMode}
-        className="w-full max-w-[400px] flex flex-col"
+        className="flex w-full flex-col"
       >
         <TabsContent value="login" className="flex-1 mt-0">
-          <Card className="border bg-card h-full flex flex-col">
-            <CardHeader className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2 bg-muted/50 shrink-0 text-sm">
+          <Card className="h-full gap-5 border-primary/10 bg-card shadow-md">
+            <CardHeader className="space-y-5">
+              <TabsList className="grid w-full shrink-0 grid-cols-2 bg-muted text-sm">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-card data-[state=active]:text-primary"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-card data-[state=active]:text-primary"
                 >
                   Sign Up
                 </TabsTrigger>
               </TabsList>
-              <CardTitle className="text-2xl font-bold tracking-tight">
+              <CardTitle className="text-xl font-semibold tracking-tight">
                 Welcome back
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
@@ -93,7 +93,7 @@ export function AuthForm() {
                 <div className="grid gap-2">
                   <Label
                     htmlFor="email"
-                      className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                      className="text-sm font-medium text-foreground"
                     >
                       Email
                     </Label>
@@ -102,14 +102,13 @@ export function AuthForm() {
                       name="email"
                       type="email"
                       placeholder="name@example.com"
-                      className="bg-background/50"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label
                     htmlFor="password"
-                      className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                      className="text-sm font-medium text-foreground"
                     >
                       Password
                     </Label>
@@ -117,7 +116,6 @@ export function AuthForm() {
                       id="password"
                       name="password"
                       type="password"
-                      className="bg-background/50"
                     required
                   />
                 </div>
@@ -140,23 +138,23 @@ export function AuthForm() {
           </Card>
         </TabsContent>
         <TabsContent value="signup" className="flex-1 mt-0">
-          <Card className="border bg-card h-full flex flex-col">
-            <CardHeader className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2 bg-muted/50 shrink-0 text-sm">
+          <Card className="h-full gap-5 border-primary/10 bg-card shadow-md">
+            <CardHeader className="space-y-5">
+              <TabsList className="grid w-full shrink-0 grid-cols-2 bg-muted text-sm">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-card data-[state=active]:text-primary"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="data-[state=active]:bg-card data-[state=active]:text-primary"
                 >
                   Sign Up
                 </TabsTrigger>
               </TabsList>
-              <CardTitle className="text-2xl font-bold tracking-tight">
+              <CardTitle className="text-xl font-semibold tracking-tight">
                 Create an account
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
@@ -168,7 +166,7 @@ export function AuthForm() {
                 <div className="grid gap-2">
                   <Label
                     htmlFor="signup-email"
-                    className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                    className="text-sm font-medium text-foreground"
                     >
                       Email
                     </Label>
@@ -177,14 +175,13 @@ export function AuthForm() {
                     name="email"
                     type="email"
                     placeholder="name@example.com"
-                    className="bg-background/50"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label
                     htmlFor="signup-password"
-                    className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                    className="text-sm font-medium text-foreground"
                   >
                     Password
                   </Label>
@@ -192,7 +189,6 @@ export function AuthForm() {
                     id="signup-password"
                     name="password"
                     type="password"
-                    className="bg-background/50"
                     required
                   />
                 </div>

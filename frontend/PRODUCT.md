@@ -6,30 +6,41 @@ product
 
 ## Users
 
-Students and educators who need to turn markdown notes into clean, presentable slides quickly. They are comfortable with markdown but want the output to look polished without fiddling with a design tool. Their context is academic: lecture notes, project presentations, study reviews. They work on laptops, often in classrooms or libraries.
+Students and educators who turn markdown notes into presentations. They are comfortable writing structured text, work mostly on laptops in classrooms and libraries, and want polished output without learning a visual design tool.
 
 ## Product Purpose
 
-MarkDeck transforms markdown into presentation slides with a minimal, focused workflow. It exists so students and educators can spend time on content, not on formatting. Success means a user can write notes in markdown and present them as slides without ever leaving the text — no drag-and-drop, no template picking, no formatting toolbar.
+MarkDeck turns markdown into presentation-ready slides through a focused loop: write, preview, present. It protects the speed and clarity of plain text while giving the surrounding workspace enough visual character to feel creative, dependable, and enjoyable to return to.
+
+Success means a user can move from rough notes to a coherent deck without leaving the keyboard or managing individual visual elements.
 
 ## Brand Personality
 
-Clean, Focused, Minimal. The tone is helpful but quiet — it doesn't celebrate itself. MarkDeck is the tool that gets out of the way.
+Focused, creative, assured, and contemporary. MarkDeck is calm without being colorless and expressive without competing with the work. It should feel like a well-designed academic tool rather than a generic document utility.
+
+## Product Experience
+
+- **Markdown remains the interface.** No drag-and-drop canvas, element selection, or formatting property panels.
+- **Color supports the task.** A stable, softly saturated application palette creates hierarchy, wayfinding, and clear states. Presentation themes remain isolated to slide canvases.
+- **Density follows context.** The editor is compact and tool-like; dashboards, authentication, and empty states have more breathing room.
+- **Familiar patterns earn trust.** Navigation, forms, dialogs, and controls use recognizable behaviors with consistent feedback.
+- **Creative confidence, not spectacle.** The product has a visible identity, but ornament never slows the write-to-present workflow.
 
 ## Anti-references
 
-Not like Canva. MarkDeck should never feel like a drag-and-drop design canvas. No visual editor, no element selection, no property panels. The interface is a text editor and a preview — that's it.
+- Not Canva: no freeform canvas, element handles, floating property controls, or template-shopping workflow.
+- Not a monochrome developer tool: black, white, and borders alone must not carry the entire hierarchy.
+- Not a playful classroom toy: avoid loud primaries, cartoon styling, and excessive illustration.
+- Not decorative academic nostalgia: no paper textures, faux stationery, or library-themed ornament.
 
 ## Design Principles
 
-1. **Markdown-first** — The content format is the interface. What you write is what you present. No WYSIWYG abstraction layer.
-
-2. **Focused, not feature-rich** — Do one thing well. Every feature must serve the core workflow: write → preview → present. If it doesn't, it doesn't belong.
-
-3. **Get out of the way** — The tool should feel invisible. Students should think about their content, not the tool. Subtle transitions, no unnecessary chrome, no learning curve.
-
-4. **Confidence through simplicity** — Clean UI builds trust. Limited choices reduce cognitive load. The 26 themes provide visual variety while keeping the interaction model constant.
+1. **Content leads, color guides.** Markdown and the slide preview remain dominant. Color identifies actions, selection, collaboration, and important states.
+2. **Stable workspace, expressive canvas.** The application uses one consistent brand palette; selected slide themes never recolor the editor chrome.
+3. **Structure before containers.** Use spacing, tonal surfaces, and dividers to create hierarchy. Avoid turning every region into an equal bordered card.
+4. **Calm can still be chromatic.** Prefer muted mineral colors and tinted neutrals over grayscale or high saturation.
+5. **One clear next action.** Each view should make its primary task visually obvious without making every control prominent.
 
 ## Accessibility & Inclusion
 
-No specific WCAG level targeted yet. Baseline web accessibility — keyboard navigation, sufficient contrast, readable font sizes.
+Target WCAG 2.1 AA contrast for text and interactive controls. Preserve full keyboard navigation, visible focus states, readable default sizes, non-color state indicators, reduced-motion behavior, and layouts that remain usable at mobile and zoomed viewport sizes.
