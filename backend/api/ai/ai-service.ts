@@ -21,8 +21,9 @@ type AiGenerationInput = {
   numSlides?: number;
 };
 
-const OPENROUTER_CHAT_COMPLETIONS_URL =
-  "https://openrouter.ai/api/v1/chat/completions";
+const AI_BASE_URL =
+  process.env.AI_BASE_URL || "https://api.groq.com/openai/v1";
+const AI_CHAT_COMPLETIONS_URL = `${AI_BASE_URL}/chat/completions`;
 
 const extractJsonObject = (text: string): string => {
   const start = text.indexOf("{");
@@ -36,10 +37,10 @@ const extractJsonObject = (text: string): string => {
   return text.slice(start, end + 1);
 };
 
-const generateSlidesWithOpenRouter = async (
+const generateSlides = async (
   input: AiGenerationInput,
 ): Promise<GeneratedSlide[]> => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.AI_API_KEY;
   if (!apiKey) {
     throw serviceUnavailable(
       "Slide generation is unavailable",
@@ -47,7 +48,11 @@ const generateSlidesWithOpenRouter = async (
     );
   }
 
-  const model = process.env.OPENROUTER_MODEL || "tencent/hy3:free";
+  const model = process.env.AI_MODEL || "openai/gpt-oss-120b";
+  const maxCompletionTokens = Number(process.env.AI_MAX_COMPLETION_TOKENS || 6_000);
+
+  const stripThinkBlocks = (text: string): string =>
+    text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
   const system = `You generate slide decks rendered via React Markdown with GFM support. Output must be valid JSON only.
 
@@ -72,7 +77,7 @@ RULES FOR VARIETY:
 - Use bold text to highlight key terms and concepts.`;
 
   const maxBase64Chars = Number(
-    process.env.OPENROUTER_MAX_FILE_BASE64_CHARS || 50_000,
+    process.env.AI_MAX_FILE_BASE64_CHARS || 50_000,
   );
 
   const filesForPrompt = (input.files ?? []).map((file, index) => {
@@ -129,7 +134,7 @@ ${slideCountRule}
 
   let response: Response;
   try {
-    response = await fetch(OPENROUTER_CHAT_COMPLETIONS_URL, {
+    response = await fetch(AI_CHAT_COMPLETIONS_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -138,6 +143,7 @@ ${slideCountRule}
       body: JSON.stringify({
         model,
         temperature: 0.4,
+        max_completion_tokens: maxCompletionTokens,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -170,8 +176,10 @@ ${slideCountRule}
     );
   }
 
-  const content = data.choices?.[0]?.message?.content ?? "";
-  if (!content.trim()) {
+  const content = stripThinkBlocks(
+    data.choices?.[0]?.message?.content ?? "",
+  );
+  if (!content) {
     throw badGateway(
       "Slide generation returned an empty response",
       "SLIDE_GENERATION_FAILED",
@@ -211,5 +219,5 @@ ${slideCountRule}
 };
 
 export const aiService = {
-  generateSlidesWithOpenRouter,
+  generateSlides,
 } as const;

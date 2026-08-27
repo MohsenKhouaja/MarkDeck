@@ -294,7 +294,7 @@ const generateFromContext = async (
     );
   }
 
-  const generated = await aiService.generateSlidesWithOpenRouter({
+  const generated = await aiService.generateSlides({
     title: presentationRow.title,
     contextPrompt,
     files: contextFiles,
